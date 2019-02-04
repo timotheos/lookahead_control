@@ -6,4 +6,7 @@
   </description>
   <maintainer email="mathapua AT gmail DOT com">Timothy Pua</maintainer>
   <license>BSD</license>
+
+  <buildtool_depend></buildtool_depend>
+  <depend></depend>
 </package>
