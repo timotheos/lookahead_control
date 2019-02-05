@@ -1,0 +1,17 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/deploy/repositories/the_overnight_build/devel/include",
+        "/opt/ros/kinetic/include",
+        "/home/deploy/repositories/the_overnight_build/src/lookahead_control/include",
+        "/usr/include"
+      ],
+      "name": "Linux"
+    }
+  ]
+}
