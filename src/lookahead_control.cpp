@@ -3,7 +3,6 @@
 #include <tf2/LinearMath/Quaternion.h>
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/Imu.h>
-#include <Aria/Aria.h>
 
 class lookaheadControl {
   public:
@@ -48,6 +47,8 @@ int main(int argc, char** argv) {
   // input odometry 
 
   // output cmd_vel
+
+  ros::spin();
 
   return 0;
 }
