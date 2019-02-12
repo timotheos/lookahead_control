@@ -6,8 +6,8 @@ The look-ahead controller is designed by using input-output linearization and no
 constraint equations.
 
 ## Subscribed Topics
+* `odometry`
 
 ## Published Topics
-
-`cmd_vel` ([geometry_msgs/Twist](http://docs.ros.org/api/geometry_msgs/html/msg/Twist.html))  
+* `cmd_vel` ([geometry_msgs/Twist](http://docs.ros.org/api/geometry_msgs/html/msg/Twist.html))  
   
