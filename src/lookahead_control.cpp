@@ -22,7 +22,7 @@ lookaheadControl::~lookaheadControl()
 {
 }
 
-void callback(const nav_msgs::Odometry::ConstPtr& msg) {
+void chatterCallback(const nav_msgs::Odometry::ConstPtr& msg) {
   ROS_INFO("Seq: [%d]", msg->header.seq);
   ROS_INFO("Position-> x: [%f], y: [%f], z: [%f]",
            msg->pose.pose.position.x, 
@@ -43,7 +43,12 @@ int main(int argc, char** argv) {
 
   ros::NodeHandle nh;
 
-  ros::Subscriber sub = 
+  ros::Subscriber sub = nh.subscribe("odometry", 1000, chatterCallback);
+
+  // input odometry 
+
+  // output cmd_vel
+
   return 0;
 }
 
