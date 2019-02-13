@@ -11,3 +11,6 @@ constraint equations.
 ## Published Topics
 * `cmd_vel` ([geometry_msgs/Twist](http://docs.ros.org/api/geometry_msgs/html/msg/Twist.html))  
 * `/tf`  
+
+### parameters
+`lookahead_distance`
