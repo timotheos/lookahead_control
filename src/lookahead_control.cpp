@@ -2,61 +2,76 @@
 #include <std_msgs/Float64.h>
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Twist.h>
-#include <geometry_msgs/Quaternion.h>
+// #include <geometry_msgs/Quaternion.h>
 #include <tf/transform_datatypes.h>
-//#include <tf2_ros/transform_broadcaster.h>
-//#include <tf2_ros/transform_broadcaster.h>
-//#include <tf2/LinearMath/Quaternion.h>
+// #include <tf2_ros/transform_broadcaster.h>
+// #include <tf2/LinearMath/Quaternion.h>
 // #include <sensor_msgs/Imu.h>
 
 struct StateVariables {
   double x_q;
   double y_q;
   double theta_q;
+
+  StateVariables() {
+    x_q = 0; y_q = 0; theta_q = 0;
+  }
 };
 
 class LookaheadControl {
   private:
-    StateVariables state_var;
+    // ROS 
+    ros::NodeHandle nh;
+    ros::Subscriber odom_sub;
+    ros::Publisher cmd_vel_pub;
+    double output_equation[2];
+    // double x_reference
+    double decoupling_matrix[2][2];
+
+    // LookaheadControl Functions
+    void odomCallback(const nav_msgs::Odometry::ConstPtr& msg);
+    void getCommandVelocity(); // robot input
 
   public:
-    double LOOKAHEAD_POINT;
+    double lookahead_distance;
+    double lookahead_point;     // meters to point waypoint
+    StateVariables state_var;
 
-    void odomCallback();
-    void getStateVariables();
-    void getDecouplingMatrix();
-}
+    // Constructor
+    LookaheadControl() {
+      lookahead_distance = 0.9; // in meters
+      cmd_vel_pub = nh.advertise<geometry_msgs::Twist>("cmd_vel", 10);
+      odom_sub = nh.subscribe("odometry", 1000, &LookaheadControl::odomCallback, this);
+      nh.param<double>("lookahead_distance", lookahead_distance, 0.8);
+    }
 
-  void odomCallback(const nav_msgs::Odometry::ConstPtr& msg) {
+    // Clean up
+    ~LookaheadControl() {}
+};
+
+  void LookaheadControl::odomCallback(const nav_msgs::Odometry::ConstPtr& msg) {
     // Data holder
     geometry_msgs::Quaternion msg_holder;
     
     // Assign x and y state variables 
-    x_q = msg->pose.pose.position.x;
-    y_q = msg->pose.pose.position.y;
+    state_var.x_q = msg->pose.pose.position.x;
+    state_var.y_q = msg->pose.pose.position.y;
 
     // convert quarternion to rotation
-    // state_var[0] 
-    // tf::getYaw()
-    // q.pose.pose.orientation
+    // tf::quaternionMsgToTF(msg->pose.pose.orientation, pose);
+    state_var.theta_q = tf::getYaw(msg->pose.pose.orientation);
+  }
+
+  void LookaheadControl::getCommandVelocity() {
+    void calculate();
   }
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "lookahead_control");
-  ros::NodeHandle nh;
+  LookaheadControl lookaheadControl;
 
-  // Obtain the state of the robot
-  ros::Subscriber output = nh.subscribe("odometry", 200, odomCallback);
-  nh.param<std_msg::Float64>("lookahead_distance", lookahead_distance, 1000);
-  
-  
-  
-  // input odometry 
-
-  // output cmd_vel
-  ros::Publisher command_feedback =
-    nh.advertise<geometry_msgs::Twist>("cmd_vel", 10);
-
+  // subscribe to odometry and 
+  // lookaheadControl.
 
   ros::spin();
 

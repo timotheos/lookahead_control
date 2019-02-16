@@ -1,0 +1,4 @@
+<launch>
+  <remap from="cmd_vel" to="RosAria/cmd_vel"/>
+  <node pkg="lookahead_control" type="lookahead_control" name="lookahead_control" />
+</launch>
