@@ -19,7 +19,8 @@ struct StateVariables {
 };
 
 class LookaheadControl {
-  private:
+  public:
+  // private:
     // ROS 
     ros::NodeHandle nh;
     ros::Subscriber odom_sub;
@@ -32,7 +33,7 @@ class LookaheadControl {
     void odomCallback(const nav_msgs::Odometry::ConstPtr& msg);
     void getCommandVelocity(); // robot input
 
-  public:
+  // public:
     double lookahead_distance;
     double lookahead_point;     // meters to point waypoint
     StateVariables state_var;
