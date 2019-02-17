@@ -13,11 +13,11 @@ class LookaheadControl {
    // ROS 
    ros::Publisher cmd_vel_pub;
    ros::Subscriber odom_sub;
-  //  ros::Rate rate(10); // double check this later
+   //  ros::Rate rate(10); // double check this later
 
    // State variables
-   double current_position_x_, current_position_y_;
-   double current_orientation_theta_; 
+   double state_variable_x_, state_variable_y_;
+   double state_variable_theta_; 
    //  double state_variables_[3];
 
    // Lookahead point
@@ -29,8 +29,13 @@ class LookaheadControl {
    double reference_point_x_, reference_point_y_;
 
    // decoupling matrix
-   double decoupling_inverse[2][2];
-   double decoupling_matrix[2][2];
+   double decoupling_inverse_[2][2];
+   double decoupling_matrix_[2][2];
+   double& a_ = decoupling_matrix_[0][0];
+   double& b_ = decoupling_matrix_[0][1];
+   double& c_ = decoupling_matrix_[1][0];
+   double& d_ = decoupling_matrix_[1][1];
+   double determinant;
    
    // nonlinear feedback 
    double feedback_gains[2];
@@ -44,6 +49,7 @@ class LookaheadControl {
    void odomCallback(const nav_msgs::Odometry::ConstPtr& msg);
    
    void getReferencePointCoordinates();
+   void getDecouplingInverseMatrix();
    // LookaheadControl Functions
    // waypoint minus current position3
    // void getDistanceToGoal(const StateVariables& current, const ); 
@@ -68,39 +74,54 @@ class LookaheadControl {
   void LookaheadControl::odomCallback(const nav_msgs::Odometry::ConstPtr& msg)
   {
     // Assign x and y state variables 
-    current_position_x_ = msg->pose.pose.position.x;
-    current_position_y_ = msg->pose.pose.position.y;
+    state_variable_x_ = msg->pose.pose.position.x;
+    state_variable_y_ = msg->pose.pose.position.y;
 
     // convert quarternion to rotation
     // tf::quaternionMsgToTF(msg->pose.pose.orientation, pose);
-    current_orientation_theta_ = tf::getYaw(msg->pose.pose.orientation);
+    state_variable_theta_ = tf::getYaw(msg->pose.pose.orientation);
   }
 
   void LookaheadControl::getReferencePointCoordinates()
   {
-    reference_point_x_ = current_position_x_ +
-                        lookahead_point_x_*cos(current_orientation_theta_) -
-                        lookahead_point_y_*sin(current_orientation_theta_);
-    reference_point_y_ = current_position_y_ +
-                        lookahead_point_x_*sin(current_orientation_theta_) +
-                        lookahead_point_y_*cos(current_orientation_theta_);
+    reference_point_x_ = state_variable_x_
+                         + lookahead_point_x_*cos(state_variable_theta_)
+                         - lookahead_point_y_*sin(state_variable_theta_);
+    reference_point_y_ = state_variable_y_
+                         + lookahead_point_x_*sin(state_variable_theta_)
+                         + lookahead_point_y_*cos(state_variable_theta_);
+  }
+
+  void LookaheadControl::getDecouplingInverseMatrix()
+  {
+    a_ = cos(state_variable_theta_);
+    b_ = - state_variable_y_ * cos(state_variable_theta_) 
+                              - state_variable_x_ * sin(state_variable_theta_);
+    c_ = sin(state_variable_theta_);
+    d_ = - state_variable_y_ * sin(state_variable_theta_) 
+                              + state_variable_x_ * cos(state_variable_theta_);
+    
+    determinant = a_*d_- b_*c_;
+
+    decoupling_inverse_[0][0] =  d_ / determinant;
+    decoupling_inverse_[0][1] = -b_ / determinant;
+    decoupling_inverse_[1][0] = -c_ / determinant;
+    decoupling_inverse_[1][1] =  a_ / determinant;
   }
 
   void LookaheadControl::getNonlinearFeedback()
   { 
-    // obtain current position
-    LookaheadControl::getReferencePointCoordinates();
-
-    // get inverse decoupling matrix
-
-    // get linear feedback v
-    // state_var.x_q + 
-    // calculate for nonlinear feedback 
-
-
     while(ros::ok())
     {
-    
+      // obtain current position
+      LookaheadControl::getReferencePointCoordinates();
+
+      // get inverse decoupling matrix
+      LookaheadControl::getDecouplingInverseMatrix();
+
+      // get linear feedback v
+
+      // calculate for nonlinear feedback 
 
       ros::spinOnce();
       // rate.sleep;
