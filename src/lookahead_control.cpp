@@ -18,7 +18,6 @@ class LookaheadControl {
    // State variables
    double state_variable_x_, state_variable_y_;
    double state_variable_theta_; 
-   //  double state_variables_[3];
 
    // Lookahead point
    // translation along the centerline from the center of the robot
@@ -29,14 +28,13 @@ class LookaheadControl {
    double reference_point_x_, reference_point_y_;
 
    // decoupling matrix
-   double decoupling_inverse_[2][2];
-   double decoupling_matrix_[2][2];
-   double& a_ = decoupling_matrix_[0][0];
-   double& b_ = decoupling_matrix_[0][1];
-   double& c_ = decoupling_matrix_[1][0];
-   double& d_ = decoupling_matrix_[1][1];
+   double a_, b_;
+   double c_, d_;
    double determinant;
+   double decoupling_inverse_[2][2];
+  //  double decoupling_matrix_[2][2];
    
+
    // nonlinear feedback 
    double feedback_gains[2];
    double distance_to_goal[2];
@@ -52,7 +50,8 @@ class LookaheadControl {
    void getDecouplingInverseMatrix();
    // LookaheadControl Functions
    // waypoint minus current position3
-   // void getDistanceToGoal(const StateVariables& current, const ); 
+   void getDistanceToGoal(); 
+   void getLinearFeedback();
    void getNonlinearFeedback(); // robot input
 
 
@@ -109,6 +108,11 @@ class LookaheadControl {
     decoupling_inverse_[1][1] =  a_ / determinant;
   }
 
+  void LookaheadControl::getLinearFeedback()
+  {
+    
+  }
+
   void LookaheadControl::getNonlinearFeedback()
   { 
     while(ros::ok())
@@ -120,6 +124,7 @@ class LookaheadControl {
       LookaheadControl::getDecouplingInverseMatrix();
 
       // get linear feedback v
+      LookaheadControl::getLinearFeedback();
 
       // calculate for nonlinear feedback 
 
