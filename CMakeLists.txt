@@ -8,12 +8,18 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   nav_msgs
   geometry_msgs
+  cmake_modules
 )
+find_package(Eigen REQUIRED)
 
-catkin_package()
+catkin_package(
+  DEPENDS Eigen
+)
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${Eigen_INCLUDE_DIRS}
+  include
 )
 add_executable(lookahead_control src/lookahead_control.cpp)
 add_dependencies(lookahead_control nav_msgs_generate_messages_cpp)
