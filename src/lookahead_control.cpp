@@ -1,3 +1,4 @@
+#include <ros/ros.h>
 #include <lookahead_control.h>
 
 // class LookaheadControl {
@@ -144,9 +145,22 @@
   //   // rate.sleep;
   // }
 
-// Constructor
-LookAheadControl::LookAheadControl(geometry_msgs::TwistStamped cmd_vel, nav_msgs::Odometry odom)
+void LookAheadControl::spin()
 {
+ while (ros::ok())
+ {
+   ros::spinOnce();
+ }
+}
+
+// Constructor
+LookAheadControl::LookAheadControl() : pnh_("~")
+{
+  ROS_INFO("Initialized node.");
+  pub_cmd_vel_ = pnh_.advertise<geometry_msgs::Twist>("cmd_vel", 5);
+  ROS_INFO("Publishing cmd_vel");
+  // nav_msgs::Odometry odom;
+
   // cmd_vel_pub = node.advertise<geometry_msgs::Twist>("cmd_vel", 100);
   // ROS_INFO_STREAM("Adding the subscriber: odometry");
   // odom_sub = node.subscribe("odometry", 1000,
@@ -157,16 +171,18 @@ LookAheadControl::LookAheadControl(geometry_msgs::TwistStamped cmd_vel, nav_msgs
   // node.param<double>("lookahead_point_y", lookahead_point_y_, 0.0);
 }
 
-int main(int argc, char **argv) {
-  // ros::init(argc, argv, "lookahead_control");
-  // ros::NodeHandle nh;
-  // LookaheadControl lookaheadControl(nh);
-  // while(ros::ok()){
-  //   lookaheadControl.getNonlinearFeedback();
-  // }
-  
-  
+LookAheadControl::~LookAheadControl() 
+{
 
+}
+
+int main(int argc, char **argv)
+{
+  ros::init(argc, argv, "lookahead_control");
+  LookAheadControl node;
+
+  node.spin();
+  
   return 0;
 }
 

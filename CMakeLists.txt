@@ -13,20 +13,24 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(Eigen REQUIRED)
 
 catkin_package(
-  DEPENDS Eigen
+  INCLUDE_DIRS include
+  DEPENDS eigen
+  CATKIN_DEPENDS roscpp 
+  DEPENDS Eigen 
 )
+
+# include_directories(include ${catkin_INCLUDE_DIRS})
 
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
   ${Eigen_INCLUDE_DIRS}
-  include
 )
-add_executable(lookahead_control src/lookahead_control.cpp)
-add_dependencies(lookahead_control nav_msgs_generate_messages_cpp)
 
-target_link_libraries(lookahead_control 
-  ${catkin_LIBRARIES}
-)
+add_executable(lookahead_control src/lookahead_control.cpp)
+# add_library(lookahead_control include/lookahead_control.h)
+
+target_link_libraries(lookahead_control ${catkin_LIBRARIES})
 
 #############
 ## Testing ##

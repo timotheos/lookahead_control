@@ -1,20 +1,28 @@
 #ifndef LOOKAHEAD_CONTROL_H_
 #define LOOKAHEAD_CONTROL_H_
 
-#include "ros/ros.h"
+#include <ros/ros.h>
 #include <Eigen/Dense>
 
 #include <std_msgs/Float64.h>
-#include <nav_msgs/Odometry.h>
-#include <geometry_msgs/TwistStamped.h>
+#include <nav_msgs/Odometry.h> // output of pioneer
+#include <geometry_msgs/Twist.h> // input to 
 #include <geometry_msgs/Pose.h>
 
 #include <tf/transform_datatypes.h>
 
 class LookAheadControl
 {
-  private:
+  protected:
     // ROS
+    // private node handle
+    ros::NodeHandle pnh_; 
+    ros::Publisher pub_cmd_vel_;
+    ros::Subscriber sub_pos_;
+    
+    // ROS Time
+    // ros::Time timestamp_base_;
+
     // output (Odometry)
 
     // input (cmd_vel)
@@ -36,10 +44,16 @@ class LookAheadControl
 
     // 4. Linear Feedback
 
+    // 5. Velocity Input
+    geometry_msgs::Twist cmd_vel_;
+
 
   public:
+    // ROS
+    ros::NodeHandle nh_;
+    void spin();
     // odometry and cmd_vel messages are passed
-    LookAheadControl(geometry_msgs::TwistStamped cmd_vel, nav_msgs::Odometry odom);
+    LookAheadControl(geometry_msgs::Twist cmd_vel, nav_msgs::Odometry odom);
     // overloaded constructor
     LookAheadControl();
     // destructor
