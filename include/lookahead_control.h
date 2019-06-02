@@ -8,7 +8,7 @@
 #include <nav_msgs/Odometry.h> // output of pioneer
 #include <nav_msgs/Path.h>
 #include <geometry_msgs/Twist.h> // input to 
-#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/PoseStamped.h>
 
 #include <tf/LinearMath/Matrix3x3.h>
 
@@ -16,27 +16,28 @@
 class LookAheadControl
 {
   protected:
-    // ROS
-    // private node handle
+    // ROS node handles
     ros::NodeHandle pnh_; 
     ros::Publisher pub_cmd_vel_;
     ros::Subscriber sub_pos_;
+      nav_msgs::Odometry odom_;
 
-    // parameters
-    // required path to follow <y hat> (w_x_rd and w_y_rd)
-    nav_msgs::Path path_desired_; // 
-    // reference for making this later
-    // https://answers.ros.org/question/282094/publish-a-path/
+      geometry_msgs::PoseStamped point_desired_;
+      // required path to follow <y hat> (w_x_rd and w_y_rd)
+      // reference for making this later
+      // https://answers.ros.org/question/282094/publish-a-path/
+      // TODO: Path planning
+      // nav_msgs::Path path_desired_;
 
-    // maximum rotational speed for the robot <y hat dot>
-    // pioneer at is 140 and dx is 300
-    double rot_vel_;
-    double matrix_here_[];
+    // ROS parameters
+    // look ahead distance
+      std_msgs::Float64 lookahead_distance_x_;
+      std_msgs::Float64 lookahead_distance_y_;
 
-
-
-
-
+      // maximum rotational speed for the robot <y hat dot>
+      // pioneer at is 140 and dx is 300
+      std_msgs::Float64 robot_rot_vel_;
+      std_msgs::Float64 gains_kp_[2];
 
     // robot output (Odometry)
 

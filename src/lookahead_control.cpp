@@ -150,9 +150,9 @@ void LookAheadControl::odomCallback(const nav_msgs::Odometry& odometry) {
   // pass the odometry message to the state estimates
   
   
-  pose_x_ = robot_state.position.x;
-  pose_y_ = robot_state.position.y;
-  ROS_INFO("running");
+  // pose_x_ = robot_state.position.x;
+  // pose_y_ = robot_state.position.y;
+  // ROS_INFO("running");
 }
 
 void LookAheadControl::spin()
