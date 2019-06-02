@@ -6,12 +6,11 @@
                 "limitSymbolsToIncludedHeaders": true
             },
             "includePath": [
-                "/home/deploy/repositories/the_overnight_build/devel/include",
                 "/opt/ros/kinetic/include",
                 "/opt/ros/kinetic/shared",
-                "/home/deploy/repositories/the_overnight_build/src/lookahead_control/include",
                 "/usr/include",
-                "/usr/local/Aria/include"
+                "/usr/local/Aria/include",
+                "${workspaceFolder}/include"
             ],
             "name": "Linux",
             "intelliSenseMode": "gcc-x64"

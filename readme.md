@@ -4,6 +4,7 @@ Look-ahead control is feedback controller for nonholonomic mobile robot systems.
 mobile robot follows a predefined point a set distance from the center of the robot.
 The look-ahead controller is designed by using input-output linearization and nonholonomic 
 constraint equations.
+![Look-Ahead Control](./diagram-lookahead_control.png)
 
 ## Subscribed Topics
 * `odometry` ([nav_msgs/Odometry](http://docs.ros.org/kinetic/api/nav_msgs/html/msg/Odometry.html))

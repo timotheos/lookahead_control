@@ -1,5 +1,6 @@
 #include <ros/ros.h>
 #include <lookahead_control.h>
+#include "tf/LinearMath/Matrix3x3.h"
 
 // class LookaheadControl {
 //   private:
@@ -149,8 +150,9 @@ void LookAheadControl::odomCallback(const nav_msgs::Odometry& odometry) {
   // pass the odometry message to the state estimates
   
   
-  // pose_x_ = robot_state.position.x;
-  // pose_y_ = robot_state.position.y;
+  pose_x_ = robot_state.position.x;
+  pose_y_ = robot_state.position.y;
+  ROS_INFO("running");
 }
 
 void LookAheadControl::spin()
@@ -167,8 +169,8 @@ LookAheadControl::LookAheadControl() : pnh_("~")
   ROS_INFO("Initialized node.");
   pub_cmd_vel_ = pnh_.advertise<geometry_msgs::Twist>("cmd_vel", 5);
   ROS_INFO("Publishing cmd_vel");
-  sub_pos_ = pnh_.subscribe("odometry", 1000, odomCallback, this);
-
+  sub_pos_ = pnh_.subscribe("odometry", 1000, &LookAheadControl::odomCallback, this);
+  
   // nav_msgs::Odometry odom;
 
   // odom_sub = node.subscribe("odometry", 1000,
