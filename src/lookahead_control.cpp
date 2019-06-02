@@ -145,6 +145,14 @@
   //   // rate.sleep;
   // }
 
+void LookAheadControl::odomCallback(const nav_msgs::Odometry& odometry) {
+  // pass the odometry message to the state estimates
+  
+  
+  // pose_x_ = robot_state.position.x;
+  // pose_y_ = robot_state.position.y;
+}
+
 void LookAheadControl::spin()
 {
  while (ros::ok())
@@ -159,12 +167,12 @@ LookAheadControl::LookAheadControl() : pnh_("~")
   ROS_INFO("Initialized node.");
   pub_cmd_vel_ = pnh_.advertise<geometry_msgs::Twist>("cmd_vel", 5);
   ROS_INFO("Publishing cmd_vel");
+  sub_pos_ = pnh_.subscribe("odometry", 1000, odomCallback, this);
+
   // nav_msgs::Odometry odom;
 
-  // cmd_vel_pub = node.advertise<geometry_msgs::Twist>("cmd_vel", 100);
-  // ROS_INFO_STREAM("Adding the subscriber: odometry");
   // odom_sub = node.subscribe("odometry", 1000,
-  //                         &LookaheadControl::odomCallback, this);
+  //                        &LookaheadControl::odomCallback, this);
   // lookahead_point_sub = node.subscribe("lookahead_point", 1000,
   //                         &LookaheadControl::poseCallback, this);
   // node.param<double>("lookahead_point_x", lookahead_point_x_, 0.8);

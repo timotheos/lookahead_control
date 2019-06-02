@@ -11,6 +11,8 @@
 
 #include <tf/transform_datatypes.h>
 
+
+// outputs are pointers while inputs are references
 class LookAheadControl
 {
   protected:
@@ -19,18 +21,17 @@ class LookAheadControl
     ros::NodeHandle pnh_; 
     ros::Publisher pub_cmd_vel_;
     ros::Subscriber sub_pos_;
-    
-    // ROS Time
-    // ros::Time timestamp_base_;
 
     // output (Odometry)
 
     // input (cmd_vel)
 
     // 1. State Space Variables (output)
-    std_msgs::Float64 pose_x_;
-    std_msgs::Float64 pose_y_;
-    std_msgs::Float64 pose_theta_;
+    geometry_msgs::Pose robot_state;
+    double& pose_x_;
+    double& pose_y_;
+    double& pose_theta_;  
+    
 
     // 2. Decoupling matrix
     // 2.a determinant
@@ -51,7 +52,9 @@ class LookAheadControl
   public:
     // ROS
     ros::NodeHandle nh_;
+    void odomCallback(const nav_msgs::Odometry&);
     void spin();
+
     // odometry and cmd_vel messages are passed
     LookAheadControl(geometry_msgs::Twist cmd_vel, nav_msgs::Odometry odom);
     // overloaded constructor
