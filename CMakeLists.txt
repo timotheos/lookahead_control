@@ -10,22 +10,21 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   cmake_modules
 )
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
-  DEPENDS eigen
-  CATKIN_DEPENDS roscpp 
-  DEPENDS Eigen 
+  CATKIN_DEPENDS roscpp nav_msgs geometry_msgs
+  DEPENDS EIGEN3 
 )
 
 # include_directories(include ${catkin_INCLUDE_DIRS})
 
-include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
-  ${Eigen_INCLUDE_DIRS}
-)
+include_directories(include)
+include_directories(${catkin_INCLUDE_DIRS})
+include_directories(${EIGEN3_INCLUDE_DIRS})
+
+
 
 add_executable(lookahead_control src/lookahead_control.cpp)
 # add_library(lookahead_control include/lookahead_control.h)
