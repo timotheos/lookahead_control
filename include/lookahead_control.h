@@ -19,9 +19,10 @@ class LookAheadControl
     // ROS node handles
     ros::NodeHandle pnh_; 
     ros::Publisher pub_cmd_vel_;
-    ros::Subscriber sub_pos_;
+    ros::Subscriber sub_current_pose_;
       nav_msgs::Odometry odom_;
 
+    ros::Subscriber sub_target_pose_;
       geometry_msgs::PoseStamped point_desired_;
       // required path to follow <y hat> (w_x_rd and w_y_rd)
       // reference for making this later
@@ -30,14 +31,19 @@ class LookAheadControl
       // nav_msgs::Path path_desired_;
 
     // ROS parameters
-    // look ahead distance
-      std_msgs::Float64 lookahead_distance_x_;
-      std_msgs::Float64 lookahead_distance_y_;
+      /*
+          maximum rotational speed for the robot <y hat dot>
+          pioneer AT is 140 and DX is 300 (rad/s)
+      */
+      double robot_rot_vel_;
 
-      // maximum rotational speed for the robot <y hat dot>
-      // pioneer at is 140 and dx is 300
-      std_msgs::Float64 robot_rot_vel_;
-      std_msgs::Float64 gains_kp_[2];
+      /* look ahead distance */
+      double lookahead_distance_x_;
+      double lookahead_distance_y_;
+
+      /* Proportional gains */
+      double gain_kp_1_;
+      double gain_kp_2_;
 
     // robot output (Odometry)
 
@@ -70,6 +76,8 @@ class LookAheadControl
     // ROS
     ros::NodeHandle nh_;
     void odomCallback(const nav_msgs::Odometry& odom);
+    void targetPoseCallback(const geometry_msgs::PoseStamped& target_pose);
+    void setParameters();
     void spin();
 
     // odometry and cmd_vel messages are passed

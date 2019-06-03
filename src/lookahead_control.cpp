@@ -146,39 +146,67 @@
   //   // rate.sleep;
   // }
 
-void LookAheadControl::odomCallback(const nav_msgs::Odometry& odometry) {
+void LookAheadControl::odomCallback(const nav_msgs::Odometry& odometry)
+{
   // pass the odometry message to the state estimates
-  
   
   // pose_x_ = robot_state.position.x;
   // pose_y_ = robot_state.position.y;
   // ROS_INFO("running");
+
+  // run through program
+}
+
+void LookAheadControl::targetPoseCallback(const geometry_msgs::PoseStamped& target_pose)
+{
+  // update 
+  // target posed reached conditional
+}
+
+void LookAheadControl::setParameters()
+{
+  ROS_INFO("Setting parameters.");
+  pnh_.param<double>("robot_rot_vel", robot_rot_vel_, 140.0);
+  ROS_INFO_STREAM("robot_rot_vel: " << robot_rot_vel_ << "rad/s");
+  pnh_.param<double>("lookahead_distance_y", lookahead_distance_y_, 0.5);
+  ROS_INFO_STREAM("lookahead_distance_y: " << lookahead_distance_y_ << "meters");
+  pnh_.param<double>("lookahead_distance_x", lookahead_distance_x_, 0.5);
+  ROS_INFO_STREAM("lookahead_distance_x: " << lookahead_distance_x_ << "meters");
+  pnh_.param<double>("gain_kp_1", gain_kp_1_, 0.3);
+  ROS_INFO_STREAM("gain_kp_1: " << gain_kp_1_);
+  pnh_.param<double>("gain_kp_2", gain_kp_2_, 0.3);
+  ROS_INFO_STREAM("gain_kp_2: " << gain_kp_2_);
 }
 
 void LookAheadControl::spin()
 {
  while (ros::ok())
  {
-   ros::spinOnce();
+  
+  ros::spinOnce();
  }
 }
+
+
 
 // Constructor
 LookAheadControl::LookAheadControl() : pnh_("~")
 {
   ROS_INFO("Initialized node.");
+  
+  LookAheadControl::setParameters();
+
+  sub_target_pose_ = pnh_.subscribe("target_pose", 1000,
+                            &LookAheadControl::targetPoseCallback, this);
+  ROS_INFO("Subscribed to target_pose");
+
+  sub_current_pose_ = pnh_.subscribe("odom", 1000,
+                            &LookAheadControl::odomCallback, this);
+  ROS_INFO("Subscribed to odom");
   pub_cmd_vel_ = pnh_.advertise<geometry_msgs::Twist>("cmd_vel", 5);
   ROS_INFO("Publishing cmd_vel");
-  sub_pos_ = pnh_.subscribe("odometry", 1000, &LookAheadControl::odomCallback, this);
   
-  // nav_msgs::Odometry odom;
-
-  // odom_sub = node.subscribe("odometry", 1000,
-  //                        &LookaheadControl::odomCallback, this);
-  // lookahead_point_sub = node.subscribe("lookahead_point", 1000,
-  //                         &LookaheadControl::poseCallback, this);
-  // node.param<double>("lookahead_point_x", lookahead_point_x_, 0.8);
-  // node.param<double>("lookahead_point_y", lookahead_point_y_, 0.0);
+  
 }
 
 LookAheadControl::~LookAheadControl() 
