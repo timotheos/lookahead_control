@@ -45,15 +45,14 @@ class LookAheadControl
       double gain_kp_1_;
       double gain_kp_2_;
 
-    // robot output (Odometry)
-
-    // robot input (cmd_vel)
-
-    // 1. State Space Variables (output)
+    // From robot odometry
+    // 1. State Space Variables
+    // (output of plant/ input of controller)
     geometry_msgs::Pose robot_state;
     double pose_x_;
     double pose_y_;
     double pose_theta_;  
+    // NOTE: odom and map frame irl are same
     
 
     // 2. Decoupling matrix
