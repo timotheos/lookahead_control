@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 #include <lookahead_control.h>
 #include "tf/LinearMath/Matrix3x3.h"
+#include <tf/transform_datatypes.h>
 
 // class LookaheadControl {
 //   private:
@@ -146,32 +147,37 @@
   //   // rate.sleep;
   // }
 
-void LookAheadControl::odomCallback(const nav_msgs::Odometry& odometry)
+void LookAheadControl::odomCallback(const nav_msgs::Odometry::ConstPtr &odometry)
 {
   // pass the odometry message to the state estimates
-  // TODO: odometry.child_frame_id- ;
-  // pose_x_ = robot_state.position.x;
-  // pose_y_ = robot_state.position.y;
-  // ROS_INFO("running");
+  pose_x_ = odometry->pose.pose.position.x;
+  pose_y_ = odometry->pose.pose.position.y;
+  pose_theta_ = tf::getYaw(odometry->pose.pose.orientation); // fix the warning later
+  ROS_INFO_STREAM("Theta:" << pose_theta_);
 
   // run through program
 }
 
-void LookAheadControl::targetPoseCallback(const geometry_msgs::PoseStamped& target_pose)
+void LookAheadControl::targetPoseCallback(const geometry_msgs::PoseStamped::ConstPtr &target_pose)
 {
-  // update 
-  // target posed reached conditional
+  target_pose_x_ = target_pose->pose.position.x;
+  target_pose_y_ = target_pose->pose.position.y;
 }
 
 void LookAheadControl::setParameters()
 {
   ROS_INFO("Setting parameters.");
+
+  /* maximum rotational speed for the robot <y hat dot>
+     pioneer AT is 140 and DX is 300 (rad/s)              */
   pnh_.param<double>("robot_rot_vel", robot_rot_vel_, 140.0);
   ROS_INFO_STREAM("robot_rot_vel: " << robot_rot_vel_ << "rad/s");
+
   pnh_.param<double>("lookahead_distance_y", lookahead_distance_y_, 0.5);
   ROS_INFO_STREAM("lookahead_distance_y: " << lookahead_distance_y_ << "meters");
   pnh_.param<double>("lookahead_distance_x", lookahead_distance_x_, 0.5);
   ROS_INFO_STREAM("lookahead_distance_x: " << lookahead_distance_x_ << "meters");
+
   pnh_.param<double>("gain_kp_1", gain_kp_1_, 0.3);
   ROS_INFO_STREAM("gain_kp_1: " << gain_kp_1_);
   pnh_.param<double>("gain_kp_2", gain_kp_2_, 0.3);
@@ -180,32 +186,27 @@ void LookAheadControl::setParameters()
 
 void LookAheadControl::spin()
 {
- while (ros::ok())
- {
-  
-  ros::spinOnce();
- }
+  while (ros::ok())
+  {
+    sub_target_pose_  = pnh_.subscribe("target_pose", 1000,
+                            &LookAheadControl::targetPoseCallback, this);
+    sub_current_pose_ = pnh_.subscribe("odom", 1000,
+                            &LookAheadControl::odomCallback, this);
+
+    ros::spinOnce();
+    loop_rate_.sleep();
+  }
 }
 
-
-
 // Constructor
-LookAheadControl::LookAheadControl() : pnh_("~")
+LookAheadControl::LookAheadControl() : pnh_("~"), loop_rate_(10)
 {
   ROS_INFO("Initialized node.");
   
   LookAheadControl::setParameters();
 
-  sub_target_pose_ = pnh_.subscribe("target_pose", 1000,
-                            &LookAheadControl::targetPoseCallback, this);
-  ROS_INFO("Subscribed to target_pose");
-
-  sub_current_pose_ = pnh_.subscribe("odom", 1000,
-                            &LookAheadControl::odomCallback, this);
-  ROS_INFO("Subscribed to odom");
   pub_cmd_vel_ = pnh_.advertise<geometry_msgs::Twist>("cmd_vel", 5);
   ROS_INFO("Publishing cmd_vel");
-  
   
 }
 
@@ -217,11 +218,12 @@ LookAheadControl::~LookAheadControl()
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "lookahead_control");
+
   LookAheadControl node;
 
   node.spin();
   
-  return 0;
+  return 1;
 }
 
 

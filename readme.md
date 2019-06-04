@@ -8,7 +8,8 @@ constraint equations.
 
 ## Subscribed Topics
 - [ ] `odometry` ([nav_msgs/Odometry](http://docs.ros.org/api/nav_msgs/html/msg/Odometry.html))
-- [ ] `point_desired` ([geometry_msgs/PoseStamped](http://docs.ros.org/api/geometry_msgs/html/msg/PoseStamped.html)) - We want to use this eventually as a path planner
+- [ ] `point_desired` ([geometry_msgs/PoseStamped](http://docs.ros.org/api/geometry_msgs/html/msg/PoseStamped.html)) - 
+  We want to use this eventually as a path planner
 
 ## Published Topics
 - [ ] `cmd_vel` ([geometry_msgs/Twist](http://docs.ros.org/api/geometry_msgs/html/msg/Twist.html))  

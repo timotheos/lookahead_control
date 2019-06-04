@@ -20,6 +20,8 @@ class LookAheadControl
     ros::NodeHandle pnh_; 
     ros::Publisher pub_cmd_vel_;
     ros::Subscriber sub_current_pose_;
+      ros::Rate loop_rate_;
+
       nav_msgs::Odometry odom_;
 
     ros::Subscriber sub_target_pose_;
@@ -31,10 +33,7 @@ class LookAheadControl
       // nav_msgs::Path path_desired_;
 
     // ROS parameters
-      /*
-          maximum rotational speed for the robot <y hat dot>
-          pioneer AT is 140 and DX is 300 (rad/s)
-      */
+
       double robot_rot_vel_;
 
       /* look ahead distance */
@@ -48,7 +47,6 @@ class LookAheadControl
     // From robot odometry
     // 1. State Space Variables
     // (output of plant/ input of controller)
-    geometry_msgs::Pose robot_state;
     double pose_x_;
     double pose_y_;
     double pose_theta_;  
@@ -66,6 +64,8 @@ class LookAheadControl
     // 3. Output Equations
 
     // 4. Linear Feedback
+    double target_pose_x_;
+    double target_pose_y_;
 
     // 5. Velocity Input
     geometry_msgs::Twist cmd_vel_;
@@ -74,10 +74,14 @@ class LookAheadControl
   public:
     // ROS
     ros::NodeHandle nh_;
-    void odomCallback(const nav_msgs::Odometry& odom);
-    void targetPoseCallback(const geometry_msgs::PoseStamped& target_pose);
+
+    void odomCallback(const nav_msgs::Odometry::ConstPtr &odom);
+    void targetPoseCallback(const geometry_msgs::PoseStamped::ConstPtr &target_pose);
+
     void setParameters();
+
     void spin();
+
 
     // odometry and cmd_vel messages are passed
     LookAheadControl(geometry_msgs::Twist cmd_vel, nav_msgs::Odometry odom);
