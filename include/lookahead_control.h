@@ -20,15 +20,8 @@ class LookAheadControl
     ros::NodeHandle pnh_; 
     ros::Publisher pub_cmd_vel_;
     ros::Subscriber sub_current_pose_;
-    ros::Rate loop_rate_;
-
     ros::Subscriber sub_target_pose_;
-      geometry_msgs::PoseStamped point_desired_;
-      // required path to follow <y hat> (w_x_rd and w_y_rd)
-      // reference for making this later
-      // https://answers.ros.org/question/282094/publish-a-path/
-      // TODO: Path planning
-      // nav_msgs::Path path_desired_;
+    ros::Rate loop_rate_;
 
       // ROS parameters
 
@@ -51,21 +44,31 @@ class LookAheadControl
     // NOTE: odom and map frame irl are same
 
     // 2. Decoupling matrix
-    // 2.a determinant
-    std_msgs::Float64 decplg_det;
-    // 2.b matrix
-    // typedef Eigen::Array<std_msgs::Float64, 2, 2> Eigen::Array22d64;
-    Eigen::Array22d decplg_matrix;
-    Eigen::Array22d decplg_inverse;
+    Eigen::Matrix2d decplg_matrix_;
+    Eigen::Matrix2d decplg_inverse_;
 
     // 3. Output Equations
-    double y_eq1; double y_eq2;
+    double reference_pt_y_; double reference_pt_x_;
 
     // 4. Linear Feedback
+    // required path to follow <y hat> (w_x_rd and w_y_rd)
+    // reference for making this later
+    // https://answers.ros.org/question/282094/publish-a-path/
+    // TODO: Path planning
+    // nav_msgs::Path path_desired_;
+    // TODO: fix members
+    double trajectory_pt_x_;
+    double trajectory_pt_y_;
+    double time_derivative_x_;
+    double time_derivative_y_;
+    Eigen::Vector2d feedback_eq_;
     double target_pose_x_;
     double target_pose_y_;
 
+    
     // 5. Velocity Input
+    Eigen::Vector2d input_cmd_vel_;
+
     geometry_msgs::Twist cmd_vel_;
 
     void odomCallback(const nav_msgs::Odometry::ConstPtr &odom);
@@ -73,12 +76,9 @@ class LookAheadControl
 
     void parameters();
 
-    void getReferencePt();
-
-    void getDecplgMatrix();
-    void getLinearFeedback();
-
-    
+    void distanceToGoal();
+    void findCmdVel();
+    void publishCmdVel(const Eigen::Vector2d &input);
 
   public:
     // ROS
