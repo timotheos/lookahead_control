@@ -6,17 +6,6 @@
 // class LookaheadControl {
 //   private:
 
-//    // ROS 
-//    ros::Publisher cmd_vel_pub;
-//    ros::Subscriber odom_sub;
-//    ros::Subscriber lookahead_point_sub;
-//    //  ros::Rate rate(10); // double check this later
-
-//    // State variables
-//    double state_variable_x_;
-//    double state_variable_y_;
-//    double state_variable_theta_; 
-
 //    // Lookahead point
 //    // translation along the centerline from the center of the robot
 //    // note that length is in meters
@@ -100,24 +89,6 @@
   //                        + lookahead_point_y_*cos(state_variable_theta_);
   // }
 
-  // void LookaheadControl::getDecouplingInverseMatrix()
-  // {
-  //   decoupling_matrix_a_ = cos(state_variable_theta_);
-  //   decoupling_matrix_b_ = - state_variable_y_ * cos(state_variable_theta_) 
-  //                             - state_variable_x_ * sin(state_variable_theta_);
-  //   decoupling_matrix_c_ = sin(state_variable_theta_);
-  //   decoupling_matrix_d_ = - state_variable_y_ * sin(state_variable_theta_) 
-  //                             + state_variable_x_ * cos(state_variable_theta_);
-    
-  //   determinant = decoupling_matrix_a_ * decoupling_matrix_d_
-  //                 - decoupling_matrix_b_ * decoupling_matrix_c_;
-
-  //   decoupling_inverse_[0][0] =  decoupling_matrix_d_ / determinant;
-  //   decoupling_inverse_[0][1] = -decoupling_matrix_b_ / determinant;
-  //   decoupling_inverse_[1][0] = -decoupling_matrix_c_ / determinant;
-  //   decoupling_inverse_[1][1] =  decoupling_matrix_a_ / determinant;
-  // }
-
   // void LookaheadControl::getLinearFeedback()
   // {
   //   (-reference_point_x_);
@@ -129,23 +100,7 @@
 
   // }
 
-  // void LookaheadControl::publishFeedback()
-  // { 
-  //   // obtain current position
-  //   LookaheadControl::getReferencePointCoordinates();
 
-  //   // get inverse decoupling matrix
-  //   LookaheadControl::getDecouplingInverseMatrix();
-
-  //   // get linear feedback v
-  //   LookaheadControl::getLinearFeedback();
-
-  //   // calculate for nonlinear feedback 
-  //   LookaheadControl::getNonlinearFeedback();
-
-  //   ros::spinOnce();
-  //   // rate.sleep;
-  // }
 
 void LookAheadControl::odomCallback(const nav_msgs::Odometry::ConstPtr &odometry)
 {
@@ -164,7 +119,7 @@ void LookAheadControl::targetPoseCallback(const geometry_msgs::PoseStamped::Cons
   target_pose_y_ = target_pose->pose.position.y;
 }
 
-void LookAheadControl::setParameters()
+void LookAheadControl::parameters()
 {
   ROS_INFO("Setting parameters.");
 
@@ -183,6 +138,11 @@ void LookAheadControl::setParameters()
   pnh_.param<double>("gain_kp_2", gain_kp_2_, 0.3);
   ROS_INFO_STREAM("gain_kp_2: " << gain_kp_2_);
 }
+
+void LookAheadControl::getReferencePt()
+{
+  
+} 
 
 void LookAheadControl::spin()
 {
@@ -203,7 +163,7 @@ LookAheadControl::LookAheadControl() : pnh_("~"), loop_rate_(10)
 {
   ROS_INFO("Initialized node.");
   
-  LookAheadControl::setParameters();
+  LookAheadControl::parameters();
 
   pub_cmd_vel_ = pnh_.advertise<geometry_msgs::Twist>("cmd_vel", 5);
   ROS_INFO("Publishing cmd_vel");

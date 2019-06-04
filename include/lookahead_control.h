@@ -20,9 +20,7 @@ class LookAheadControl
     ros::NodeHandle pnh_; 
     ros::Publisher pub_cmd_vel_;
     ros::Subscriber sub_current_pose_;
-      ros::Rate loop_rate_;
-
-      nav_msgs::Odometry odom_;
+    ros::Rate loop_rate_;
 
     ros::Subscriber sub_target_pose_;
       geometry_msgs::PoseStamped point_desired_;
@@ -32,7 +30,7 @@ class LookAheadControl
       // TODO: Path planning
       // nav_msgs::Path path_desired_;
 
-    // ROS parameters
+      // ROS parameters
 
       double robot_rot_vel_;
 
@@ -51,7 +49,6 @@ class LookAheadControl
     double pose_y_;
     double pose_theta_;  
     // NOTE: odom and map frame irl are same
-    
 
     // 2. Decoupling matrix
     // 2.a determinant
@@ -62,6 +59,7 @@ class LookAheadControl
     Eigen::Array22d decplg_inverse;
 
     // 3. Output Equations
+    double y_eq1; double y_eq2;
 
     // 4. Linear Feedback
     double target_pose_x_;
@@ -70,22 +68,25 @@ class LookAheadControl
     // 5. Velocity Input
     geometry_msgs::Twist cmd_vel_;
 
+    void odomCallback(const nav_msgs::Odometry::ConstPtr &odom);
+    void targetPoseCallback(const geometry_msgs::PoseStamped::ConstPtr &target_pose);
+
+    void parameters();
+
+    void getReferencePt();
+
+    void getDecplgMatrix();
+    void getLinearFeedback();
+
+    
 
   public:
     // ROS
     ros::NodeHandle nh_;
 
-    void odomCallback(const nav_msgs::Odometry::ConstPtr &odom);
-    void targetPoseCallback(const geometry_msgs::PoseStamped::ConstPtr &target_pose);
-
-    void setParameters();
-
     void spin();
 
-
-    // odometry and cmd_vel messages are passed
-    LookAheadControl(geometry_msgs::Twist cmd_vel, nav_msgs::Odometry odom);
-    // overloaded constructor
+    // constructor
     LookAheadControl();
     // destructor
     ~LookAheadControl();
