@@ -3,75 +3,6 @@
 #include "tf/LinearMath/Matrix3x3.h"
 #include <tf/transform_datatypes.h>
 
-// class LookaheadControl {
-//   private:
-
-//    // Lookahead point
-//    // translation along the centerline from the center of the robot
-//    // note that length is in meters
-//    double lookahead_point_x_, lookahead_point_y_;
-//    double relative_time_;
-//    double time_derivative_x_, time_derivative_y_;
-
-//    // Reference Point coordinates
-//    double reference_point_x_, reference_point_y_;
-
-//    // decoupling matrix
-//    double decoupling_matrix_a_, decoupling_matrix_b_;
-//    double decoupling_matrix_c_, decoupling_matrix_d_;
-//    double determinant;
-//    double decoupling_inverse_[2][2];
-//   //  double decoupling_matrix_[2][2];
-
-//    // linear feedback
-//    double linear_feedback[2];
-
-//    // input 
-//    double distance_to_goal[2];
-//    double desired_point;
-
-//    // nonlinear feedback 
-//    double feedback_gains[2];
-
-//    //
-//    double nonlinear_feedback[2]; 
-
-
-//   public:
-   
-//    void getReferencePointCoordinates();
-//    void getDecouplingInverseMatrix();
-//    // LookaheadControl Functions
-//    // waypoint minus current position3
-//   //  void getDistanceToGoal(); 
-//    void getLinearFeedback();
-//    void getNonlinearFeedback(); // robot input
-//    void publishFeedback();
-
-// };
-
-
-  // void LookaheadControl::getReferencePointCoordinates()
-  // {
-  //   reference_point_x_ = state_variable_x_
-  //                        + lookahead_point_x_*cos(state_variable_theta_)
-  //                        - lookahead_point_y_*sin(state_variable_theta_);
-  //   reference_point_y_ = state_variable_y_
-  //                        + lookahead_point_x_*sin(state_variable_theta_)
-  //                        + lookahead_point_y_*cos(state_variable_theta_);
-  // }
-
-  // void LookaheadControl::getLinearFeedback()
-  // {
-  //   (-reference_point_x_);
-  //   (-reference_point_x_);
-  // }
-
-  // void LookaheadControl::getNonlinearFeedback()
-  // {
-
-  // }
-
 void LookAheadControl::parameters()
 {
   ROS_INFO("Setting parameters.");
@@ -93,28 +24,32 @@ void LookAheadControl::parameters()
 }
 
 
-void LookAheadControl::odomCallback(const nav_msgs::Odometry::ConstPtr &odometry)
+void LookAheadControl::odomCallback(const nav_msgs::Odometry &odometry)
 {
   // pass the odometry message to the state estimates
-  pose_x_ = odometry->pose.pose.position.x;
-  pose_y_ = odometry->pose.pose.position.y;
-  pose_theta_ = tf::getYaw(odometry->pose.pose.orientation); // fix the warning later
-  ROS_DEBUG_STREAM("Theta:" << pose_theta_);
+  pose_x_ = odometry.pose.pose.position.x;
+  pose_y_ = odometry.pose.pose.position.y;
+  pose_theta_ = tf::getYaw(odometry.pose.pose.orientation); // fix the warning later
+  ROS_INFO_STREAM("Current Pos (x, y):" << pose_x_ << ", " << pose_y_);
+  ROS_INFO_STREAM("Theta:" << pose_theta_);
 
   // run through program
 }
 
-void LookAheadControl::targetPoseCallback(const geometry_msgs::PoseStamped::ConstPtr &target_pose)
+void LookAheadControl::targetPoseCallback(const geometry_msgs::PoseStamped &target_pose)
 {
-  target_pose_x_ = target_pose->pose.position.x;
-  target_pose_y_ = target_pose->pose.position.y;
+  target_pose_x_ = target_pose.pose.position.x;
+  target_pose_y_ = target_pose.pose.position.y;
+  ROS_INFO_STREAM("Target Pos (x, y):" << target_pose_x_ << ", " << target_pose_y_);
 }
 
 void LookAheadControl::publishCmdVel(const Eigen::Vector2d &input_cmd_vel)
 {
+  
   cmd_vel_.linear.x = input_cmd_vel(0);
   cmd_vel_.angular.z = input_cmd_vel(0);
 
+  ROS_INFO_STREAM("command_vel:" << cmd_vel_.linear.x << ", " << cmd_vel_.angular.z);
   pub_cmd_vel_.publish(cmd_vel_);
 }
 
@@ -123,17 +58,19 @@ void LookAheadControl::distanceToGoal()
   // TODO: fix members
   double diff_x_;
   double diff_y_;
-  double diff_alpha;
+  double diff_alpha_;
   
-  trajectory_pt_x_ = pose_x_ + lookahead_distance_x_;
-  trajectory_pt_y_ = pose_y_ + lookahead_distance_y_;
+  
+  trajectory_pt_x_ = pose_x_ + 0.5 * lookahead_distance_x_;
+  trajectory_pt_y_ = pose_y_ + 0.5 * lookahead_distance_y_;
   
   diff_x_ = target_pose_x_ - pose_x_;
   diff_y_ = target_pose_y_ - pose_y_;  
-  diff_alpha = atan2(diff_x_,diff_y_);
+  diff_alpha_ = atan2(diff_x_,diff_y_);
+  ROS_INFO_STREAM("alpha: " << diff_alpha_);
 
-  time_derivative_x_ = robot_rot_vel_ * cos(diff_alpha);
-  time_derivative_y_ = robot_rot_vel_ * sin(diff_alpha);
+  time_derivative_x_ = robot_rot_vel_ * cos(diff_alpha_);
+  time_derivative_y_ = robot_rot_vel_ * sin(diff_alpha_);
 };
 
 void LookAheadControl::findCmdVel()
@@ -159,36 +96,40 @@ void LookAheadControl::findCmdVel()
 
   input_cmd_vel_ = decplg_inverse_*feedback_eq_;
 
-
-  
-  ROS_INFO("spinned!");
+  publishCmdVel(input_cmd_vel_);
 }
 
 void LookAheadControl::spin()
 {
   while (ros::ok())
   {
-    sub_target_pose_  = pnh_.subscribe("target_pose", 1000,
-                            &LookAheadControl::targetPoseCallback, this);
-    sub_current_pose_ = pnh_.subscribe("odom", 1000,
-                            &LookAheadControl::odomCallback, this);
-
-    findCmdVel();
+    
     ros::spinOnce();
+    if (target_pose_x_ - pose_x_ <= 0.05  && target_pose_y_ - pose_y_ <= 0.05) { }
+    else
+      findCmdVel();
+    
+    
     loop_rate_.sleep();
   }
 }
 
 // Constructor
-LookAheadControl::LookAheadControl() : pnh_("~"), loop_rate_(10)
+LookAheadControl::LookAheadControl() : pnh_("~"), loop_rate_(3)
 {
   ROS_INFO("Initialized node.");
   
   LookAheadControl::parameters();
 
+  sub_target_pose_  = pnh_.subscribe("target_pose", 1000,
+                            &LookAheadControl::targetPoseCallback, this);
+  sub_current_pose_ = pnh_.subscribe("odom", 1000,
+                            &LookAheadControl::odomCallback, this);
   pub_cmd_vel_ = pnh_.advertise<geometry_msgs::Twist>("cmd_vel", 5);
+
+  target_pose_x_ = 0.0;
+  target_pose_y_ = 0.0;
   ROS_INFO("Publishing cmd_vel");
-  
 }
 
 LookAheadControl::~LookAheadControl() 

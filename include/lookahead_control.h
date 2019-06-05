@@ -71,8 +71,8 @@ class LookAheadControl
 
     geometry_msgs::Twist cmd_vel_;
 
-    void odomCallback(const nav_msgs::Odometry::ConstPtr &odom);
-    void targetPoseCallback(const geometry_msgs::PoseStamped::ConstPtr &target_pose);
+    void odomCallback(const nav_msgs::Odometry &odom);
+    void targetPoseCallback(const geometry_msgs::PoseStamped &target_pose);
 
     void parameters();
 

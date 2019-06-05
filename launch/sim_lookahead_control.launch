@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="lookahead_control" type="lookahead_control" name="lookahead_control" output="screen">
+    <remap from="lookahead_control/odom" to="sim_p3at/odom"/>
+  </node>
+</launch>
