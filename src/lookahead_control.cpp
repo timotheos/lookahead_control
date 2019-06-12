@@ -61,16 +61,16 @@ void LookAheadControl::distanceToGoal()
   double diff_alpha_;
   
   
-  trajectory_pt_x_ = pose_x_ + 0.5 * lookahead_distance_x_;
-  trajectory_pt_y_ = pose_y_ + 0.5 * lookahead_distance_y_;
+  trajectory_pt_x_ = pose_x_ + lookahead_distance_x_;
+  trajectory_pt_y_ = pose_y_ + lookahead_distance_y_;
   
   diff_x_ = target_pose_x_ - pose_x_;
   diff_y_ = target_pose_y_ - pose_y_;  
-  diff_alpha_ = atan2(diff_x_,diff_y_);
+  diff_alpha_ = atan2(diff_y_,diff_x_);
   ROS_INFO_STREAM("alpha: " << diff_alpha_);
 
-  time_derivative_x_ = robot_rot_vel_ * cos(diff_alpha_);
-  time_derivative_y_ = robot_rot_vel_ * sin(diff_alpha_);
+  time_derivative_x_ = robot_rot_vel_ * (cos(diff_alpha_)); //- pose_theta_);
+  time_derivative_y_ = robot_rot_vel_ * (sin(diff_alpha_)); //- pose_theta_);
 };
 
 void LookAheadControl::findCmdVel()
@@ -94,6 +94,8 @@ void LookAheadControl::findCmdVel()
   feedback_eq_(0) = time_derivative_x_ + gain_kp_1_ * (trajectory_pt_x_ - reference_pt_x_);
   feedback_eq_(1) = time_derivative_y_ + gain_kp_2_ * (trajectory_pt_y_ - reference_pt_y_);
 
+  ROS_INFO_STREAM("feedback" << feedback_eq_(0) << ", " << feedback_eq_(1));
+
   input_cmd_vel_ = decplg_inverse_*feedback_eq_;
 
   publishCmdVel(input_cmd_vel_);
@@ -105,17 +107,16 @@ void LookAheadControl::spin()
   {
     
     ros::spinOnce();
-    if (target_pose_x_ - pose_x_ <= 0.05  && target_pose_y_ - pose_y_ <= 0.05) { }
+    if (target_pose_x_ - pose_x_ <= 0.1  && target_pose_y_ - pose_y_ <= 0.1) { }
     else
       findCmdVel();
-    
     
     loop_rate_.sleep();
   }
 }
 
 // Constructor
-LookAheadControl::LookAheadControl() : pnh_("~"), loop_rate_(3)
+LookAheadControl::LookAheadControl() : pnh_("~"), loop_rate_(5)
 {
   ROS_INFO("Initialized node.");
   
@@ -127,8 +128,6 @@ LookAheadControl::LookAheadControl() : pnh_("~"), loop_rate_(3)
                             &LookAheadControl::odomCallback, this);
   pub_cmd_vel_ = pnh_.advertise<geometry_msgs::Twist>("cmd_vel", 5);
 
-  target_pose_x_ = 0.0;
-  target_pose_y_ = 0.0;
   ROS_INFO("Publishing cmd_vel");
 }
 
