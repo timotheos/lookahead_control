@@ -8,8 +8,8 @@ void LookAheadControl::parameters()
   ROS_INFO("Setting parameters.");
 
   /* maximum rotational speed for the robot <y hat dot>
-     pioneer AT is 140 and DX is 300 (rad/s)              */
-  pnh_.param<double>("robot_rot_vel", robot_rot_vel_, 140.0);
+     pioneer AT is 140 and DX is 300 (deg/s)              */
+  pnh_.param<double>("robot_rot_vel", robot_rot_vel_, 2.443);
   ROS_INFO_STREAM("robot_rot_vel: " << robot_rot_vel_ << "rad/s");
 
   pnh_.param<double>("lookahead_distance_y", lookahead_distance_y_, 0.0);
@@ -110,7 +110,7 @@ void LookAheadControl::spin()
     diff_x = target_pose_x_ - pose_x_;
     diff_y = target_pose_y_ - pose_y_;
 
-    if (diff_x <= 0.1  && diff_y <= 0.1)
+    if (diff_x <= 0.15  && diff_y <= 0.15)
       {
 
       }
