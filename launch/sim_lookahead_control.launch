@@ -1,5 +1,19 @@
 <launch>
-  <node pkg="lookahead_control" type="lookahead_control" name="lookahead_control" output="screen">
-    <remap from="lookahead_control/odom" to="sim_p3at/odom"/>
+  <include file="$(find amr_robots_gazebo)/example-world.launch" />
+  <include file="$(find amr_robots_gazebo)/spawn-pioneer3at.launch" />
+  <!-- <node name="teleop_twist_keyboard" pkg="teleop_twist_keyboard"
+        type="teleop_twist_keyboard.py">
+    <remap from="cmd_vel" to="sim_p3at/cmd_vel" />
+  </node> -->
+  
+  <node name="lookahead_control" pkg="lookahead_control"
+        type="lookahead_control" output="screen">
+    <remap from="lookahead_control/cmd_vel" to="sim_p3at/cmd_vel" />
+    <remap from="lookahead_control/odom" to="sim_p3at/odom" />
+    <param name="lookahead_distance_x" value="0.5"/>
+    <param name="lookahead_distance_y" value="0.0"/>
+    <param name="robot_rot_vel" value="1.0"/>
+    <param name="gains_kp_1" value="1.0"/>
+    <param name="gains_kp_2" value="1.0"/>
   </node>
 </launch>

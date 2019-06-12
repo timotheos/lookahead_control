@@ -105,18 +105,25 @@ void LookAheadControl::spin()
 {
   while (ros::ok())
   {
-    
     ros::spinOnce();
-    if (target_pose_x_ - pose_x_ <= 0.1  && target_pose_y_ - pose_y_ <= 0.1) { }
+    double diff_x; double diff_y;
+    diff_x = target_pose_x_ - pose_x_;
+    diff_y = target_pose_y_ - pose_y_;
+
+    if (diff_x <= 0.1  && diff_y <= 0.1)
+      {
+
+      }
     else
       findCmdVel();
     
+    ROS_INFO_STREAM("difference x, y: " << diff_x << ", " << diff_y);
     loop_rate_.sleep();
   }
 }
 
 // Constructor
-LookAheadControl::LookAheadControl() : pnh_("~"), loop_rate_(5)
+LookAheadControl::LookAheadControl() : pnh_("~"), loop_rate_(10)
 {
   ROS_INFO("Initialized node.");
   
