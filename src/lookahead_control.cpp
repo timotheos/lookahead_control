@@ -31,7 +31,7 @@ void LookAheadControl::odomCallback(const nav_msgs::Odometry &odometry)
   pose_y_ = odometry.pose.pose.position.y;
   pose_theta_ = tf::getYaw(odometry.pose.pose.orientation); // fix the warning later
   ROS_INFO_STREAM("Current Pos (x, y):" << pose_x_ << ", " << pose_y_);
-  ROS_INFO_STREAM("Theta:" << pose_theta_);
+  ROS_INFO_STREAM("Current Yaw (Theta):" << pose_theta_);
 
   // run through program
 }
@@ -47,7 +47,7 @@ void LookAheadControl::publishCmdVel(const Eigen::Vector2d &input_cmd_vel)
 {
   
   cmd_vel_.linear.x = input_cmd_vel(0);
-  cmd_vel_.angular.z = input_cmd_vel(0);
+  cmd_vel_.angular.z = input_cmd_vel(1);
 
   ROS_INFO_STREAM("command_vel:" << cmd_vel_.linear.x << ", " << cmd_vel_.angular.z);
   pub_cmd_vel_.publish(cmd_vel_);
@@ -133,7 +133,7 @@ LookAheadControl::LookAheadControl() : pnh_("~"), loop_rate_(10)
                             &LookAheadControl::targetPoseCallback, this);
   sub_current_pose_ = pnh_.subscribe("odom", 1000,
                             &LookAheadControl::odomCallback, this);
-  pub_cmd_vel_ = pnh_.advertise<geometry_msgs::Twist>("cmd_vel", 5);
+  pub_cmd_vel_ = pnh_.advertise<geometry_msgs::Twist>("cmd_vel", 10);
 
   ROS_INFO("Publishing cmd_vel");
 }
