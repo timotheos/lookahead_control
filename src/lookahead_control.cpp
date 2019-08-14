@@ -45,10 +45,24 @@ void LookAheadControl::targetPoseCallback(const geometry_msgs::PoseStamped &targ
 
 void LookAheadControl::publishCmdVel(const Eigen::Vector2d &input_cmd_vel)
 {
-  
-  cmd_vel_.linear.x = input_cmd_vel(0);
-  cmd_vel_.angular.z = input_cmd_vel(1);
+  double diff_x_;
+  double diff_y_;
 
+  diff_x_ = abs(target_pose_x_ - trajectory_pt_x_);
+  diff_y_ = abs(target_pose_y_ - trajectory_pt_y_);  
+  ROS_INFO_STREAM("difference x, y: " << diff_x_ << ", " << diff_y_);
+
+
+  if (diff_x_ <= 0.10  && diff_y_ <= 0.10)
+    {
+      cmd_vel_.linear.x = 0;
+      cmd_vel_.angular.z = 0;
+    }
+  else
+    {
+      cmd_vel_.linear.x = input_cmd_vel(0);
+      cmd_vel_.angular.z = input_cmd_vel(1);
+    }
   ROS_INFO_STREAM("command_vel:" << cmd_vel_.linear.x << ", " << cmd_vel_.angular.z);
   pub_cmd_vel_.publish(cmd_vel_);
 }
@@ -60,12 +74,12 @@ void LookAheadControl::distanceToGoal()
   double diff_y_;
   double diff_alpha_;
   
-  
   trajectory_pt_x_ = pose_x_ + lookahead_distance_x_;
   trajectory_pt_y_ = pose_y_ + lookahead_distance_y_;
   
-  diff_x_ = target_pose_x_ - pose_x_;
-  diff_y_ = target_pose_y_ - pose_y_;  
+  diff_x_ = target_pose_x_ - trajectory_pt_x_;
+  diff_y_ = target_pose_y_ - trajectory_pt_y_;  
+
   diff_alpha_ = atan2(diff_y_,diff_x_);
   ROS_INFO_STREAM("alpha: " << diff_alpha_);
 
@@ -106,18 +120,9 @@ void LookAheadControl::spin()
   while (ros::ok())
   {
     ros::spinOnce();
-    double diff_x; double diff_y;
-    diff_x = target_pose_x_ - pose_x_;
-    diff_y = target_pose_y_ - pose_y_;
 
-    if (diff_x <= 0.15  && diff_y <= 0.15)
-      {
-
-      }
-    else
-      findCmdVel();
+    findCmdVel();
     
-    ROS_INFO_STREAM("difference x, y: " << diff_x << ", " << diff_y);
     loop_rate_.sleep();
   }
 }
