@@ -13,16 +13,18 @@ void LookAheadControl::parameters()
   ROS_INFO_STREAM("robot_rot_vel: " << robot_rot_vel_ << "rad/s");
 
   pnh_.param<double>("lookahead_distance_y", lookahead_distance_y_, 0.0);
-  ROS_INFO_STREAM("lookahead_distance_y: " << lookahead_distance_y_ << "meters");
+  ROS_INFO_STREAM("lookahead_distance_y: " << lookahead_distance_y_ << " meters");
   pnh_.param<double>("lookahead_distance_x", lookahead_distance_x_, 0.5);
-  ROS_INFO_STREAM("lookahead_distance_x: " << lookahead_distance_x_ << "meters");
+  ROS_INFO_STREAM("lookahead_distance_x: " << lookahead_distance_x_ << " meters");
 
   pnh_.param<double>("gain_kp_1", gain_kp_1_, 0.3);
   ROS_INFO_STREAM("gain_kp_1: " << gain_kp_1_);
   pnh_.param<double>("gain_kp_2", gain_kp_2_, 0.3);
   ROS_INFO_STREAM("gain_kp_2: " << gain_kp_2_);
-}
 
+  pnh_.param<double>("distance_margin", distance_margin_, 0.1);
+  ROS_INFO_STREAM("distance_margin: " << distance_margin_ << " meters");
+}
 
 void LookAheadControl::odomCallback(const nav_msgs::Odometry &odometry)
 {
@@ -43,30 +45,6 @@ void LookAheadControl::targetPoseCallback(const geometry_msgs::PoseStamped &targ
   ROS_INFO_STREAM("Target Pos (x, y):" << target_pose_x_ << ", " << target_pose_y_);
 }
 
-void LookAheadControl::publishCmdVel(const Eigen::Vector2d &input_cmd_vel)
-{
-  double diff_x_;
-  double diff_y_;
-
-  diff_x_ = abs(target_pose_x_ - trajectory_pt_x_);
-  diff_y_ = abs(target_pose_y_ - trajectory_pt_y_);  
-  ROS_INFO_STREAM("difference x, y: " << diff_x_ << ", " << diff_y_);
-
-
-  if (diff_x_ <= 0.10  && diff_y_ <= 0.10)
-    {
-      cmd_vel_.linear.x = 0;
-      cmd_vel_.angular.z = 0;
-    }
-  else
-    {
-      cmd_vel_.linear.x = input_cmd_vel(0);
-      cmd_vel_.angular.z = input_cmd_vel(1);
-    }
-  ROS_INFO_STREAM("command_vel:" << cmd_vel_.linear.x << ", " << cmd_vel_.angular.z);
-  pub_cmd_vel_.publish(cmd_vel_);
-}
-
 void LookAheadControl::distanceToGoal()
 {
   // TODO: fix members
@@ -85,7 +63,31 @@ void LookAheadControl::distanceToGoal()
 
   time_derivative_x_ = robot_rot_vel_ * (cos(diff_alpha_)); //- pose_theta_);
   time_derivative_y_ = robot_rot_vel_ * (sin(diff_alpha_)); //- pose_theta_);
-};
+}
+
+void LookAheadControl::publishCmdVel(const Eigen::Vector2d &input_cmd_vel)
+{
+  double diff_x_;
+  double diff_y_;
+
+  diff_x_ = fabs(target_pose_x_ - trajectory_pt_x_);
+  diff_y_ = fabs(target_pose_y_ - trajectory_pt_y_);  
+  ROS_INFO_STREAM("difference x, y: " << diff_x_ << ", " << diff_y_);
+
+
+  if (diff_x_ <= 0.07  && diff_y_ <= 0.07)
+    {
+      cmd_vel_.linear.x = 0;
+      cmd_vel_.angular.z = 0;
+    }
+  else
+    {
+      cmd_vel_.linear.x = input_cmd_vel(0);
+      cmd_vel_.angular.z = input_cmd_vel(1);
+    }
+  ROS_INFO_STREAM("command_vel:" << cmd_vel_.linear.x << ", " << cmd_vel_.angular.z);
+  pub_cmd_vel_.publish(cmd_vel_);
+}
 
 void LookAheadControl::findCmdVel()
 { 
@@ -128,7 +130,7 @@ void LookAheadControl::spin()
 }
 
 // Constructor
-LookAheadControl::LookAheadControl() : pnh_("~"), loop_rate_(10)
+LookAheadControl::LookAheadControl() : pnh_("~"), loop_rate_(20)
 {
   ROS_INFO("Initialized node.");
   
@@ -143,6 +145,7 @@ LookAheadControl::LookAheadControl() : pnh_("~"), loop_rate_(10)
   ROS_INFO("Publishing cmd_vel");
 }
 
+// Deconstructor
 LookAheadControl::~LookAheadControl() 
 {
 
@@ -158,6 +161,3 @@ int main(int argc, char **argv)
   
   return 1;
 }
-
-
-// rostopic pub -1 /RosAria/cmd_vel geometry_msgs/Twist '[0.1, 0.0, 0.0]' '[0.0, 0.0, 0.0]'

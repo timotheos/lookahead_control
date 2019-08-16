@@ -35,6 +35,9 @@ class LookAheadControl
       double gain_kp_1_;
       double gain_kp_2_;
 
+      /* Stopping distance mrgin  */
+      double distance_margin_;
+
     // From robot odometry
     // 1. State Space Variables
     // (output of plant/ input of controller)
